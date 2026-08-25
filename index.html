@@ -203,8 +203,11 @@
   <div id="auth-screen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border space-y-6">
       <div class="text-center space-y-2">
-        <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold shadow-inner"><i class="fa-solid fa-school"></i></div>
-        <h2 class="text-2xl font-extrabold text-slate-800">Login Sistem Absensi</h2>
+        <div id="login-logo-wrapper" class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold shadow-inner overflow-hidden">
+          <img id="login-logo-img" src="" class="w-full h-full object-contain p-2" alt="Logo Sekolah" onerror="this.style.display='none'">
+          <i id="login-logo-default" class="fa-solid fa-school"></i>
+        </div>
+        <h2 id="login-title" class="text-2xl font-extrabold text-slate-800">Login Sistem Absensi</h2>
         <p class="text-xs text-slate-500">Pilih akses login Anda (Admin atau Guru Mapel)</p>
       </div>
 
@@ -793,6 +796,7 @@
     let currentActiveView = 'dashboard';
     let pieChartInstance = null;
     let editingSiswaNisn = null, editingGuruNip = null;
+    let isWritingToBackend = false; // Flag kunci: true saat sedang simpan/hapus/import
 
     // ==== FUNGSI PENYIMPANAN SESI LOGIN (localStorage) ====
     function saveSessionToStorage() {
@@ -846,7 +850,7 @@
       updateLiveClock(); 
       setInterval(updateLiveClock, 1000); 
       initApp();
-      setInterval(syncDataRealtime, 5000);
+      setInterval(syncDataRealtime, 30000); // Diperpanjang dari 5s ke 30s untuk stabilitas
     });
 
     function getTodayLocalDateStr() {
@@ -881,17 +885,24 @@
       const statusText = document.getElementById('sync-status-text');
       if (statusText) statusText.innerText = "Syncing...";
 
+      // Daftar action yang merupakan operasi TULIS (harus kunci sync otomatis)
+      const writeActions = ['saveSiswa', 'saveGuru', 'deleteSiswa', 'deleteGuru', 'saveKelas', 'deleteKelas', 'savePengaturan', 'saveAbsensi', 'importSiswaData'];
+      const isWriteAction = writeActions.includes(actionName);
+      if (isWriteAction) isWritingToBackend = true;
+
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         let runner = google.script.run
           .withSuccessHandler((res) => {
             if (statusText) statusText.innerText = "GAS Active";
             if (res) applyBackendData(res);
             if (callback) callback(res);
+            if (isWriteAction) { isWritingToBackend = false; syncDataRealtime(); } // Sync ulang setelah tulis selesai
           })
           .withFailureHandler((err) => {
             if (statusText) statusText.innerText = "Error";
             console.error("GAS Error:", err);
             showToast("Gagal memproses ke GAS Backend", "error");
+            if (isWriteAction) isWritingToBackend = false;
           });
         
         if (param !== undefined) {
@@ -910,11 +921,13 @@
           if (statusText) statusText.innerText = "Online";
           if (res) applyBackendData(res);
           if (callback) callback(res);
+          if (isWriteAction) { isWritingToBackend = false; syncDataRealtime(); } // Sync ulang setelah tulis selesai
         })
         .catch(err => {
           if (statusText) statusText.innerText = "Offline";
           console.error("Fetch Error:", err);
           showToast("Gagal terhubung ke Server GAS", "error");
+          if (isWriteAction) isWritingToBackend = false;
         });
       }
     }
@@ -940,11 +953,57 @@
       if (data.users) adminUsers = data.users;
 
       applySchoolProfileUI();
+      applySchoolProfileToLogin(); // Terapkan juga ke layar login
       updateAllDropdowns();
       refreshCurrentViewData();
     }
 
+    // ==== TERAPKAN PROFIL SEKOLAH KE HALAMAN LOGIN ====
+    function applySchoolProfileToLogin() {
+      const p = schoolProfile;
+      if (!p) return;
+
+      // Ubah JUDUL di layar login
+      const loginTitle = document.getElementById('login-title');
+      if (loginTitle && p.namaSekolah) {
+        loginTitle.textContent = 'Login ' + p.namaSekolah;
+      } else if (loginTitle && p.nama) {
+        loginTitle.textContent = 'Login ' + p.nama;
+      }
+
+      // Ubah LOGO di layar login
+      const loginLogoImg = document.getElementById('login-logo-img');
+      const loginLogoDefault = document.getElementById('login-logo-default');
+      const logoUrl = p.logoUrl || p.logo || '';
+      
+      if (loginLogoImg && logoUrl) {
+        loginLogoImg.src = logoUrl;
+        loginLogoImg.style.display = 'block';
+        if (loginLogoDefault) loginLogoDefault.style.display = 'none';
+      }
+
+      // Ubah juga logo di sidebar & mobile header
+      const sidebarLogo = document.getElementById('sidebar-logo-img');
+      const mobileLogo = document.getElementById('mobile-logo-img');
+      const drawerLogo = document.getElementById('drawer-logo-img');
+      
+      if (sidebarLogo && logoUrl) sidebarLogo.src = logoUrl;
+      if (mobileLogo && logoUrl) mobileLogo.src = logoUrl;
+      if (drawerLogo && logoUrl) drawerLogo.src = logoUrl;
+
+      // Ubah nama sekolah di sidebar & mobile
+      const sidebarSchoolName = document.getElementById('sidebar-school-name');
+      const mobileSchoolName = document.getElementById('mobile-school-name');
+      const namaSekolah = p.namaSekolah || p.nama || '';
+      
+      if (sidebarSchoolName && namaSekolah) sidebarSchoolName.textContent = namaSekolah;
+      if (mobileSchoolName && namaSekolah) mobileSchoolName.textContent = namaSekolah;
+    }
+
     function initApp() {
+      // Terapkan profil sekolah ke layar login SEGERA saat aplikasi dimuat
+      applySchoolProfileToLogin();
+      
       const todayDateFilter = document.getElementById('rekap-date-filter');
       if (todayDateFilter) todayDateFilter.value = getTodayLocalDateStr();
       const todayBelumFilter = document.getElementById('belum-date-filter');
@@ -974,6 +1033,8 @@
     }
 
     function syncDataRealtime() {
+      // Jangan sync otomatis jika sedang ada operasi tulis ke backend
+      if (isWritingToBackend) return;
       callGasBackend('getInitialData');
     }
 
@@ -2191,9 +2252,8 @@
         students.push(siswaData);
       }
 
-      // Kirim SELURUH daftar siswa ke backend untuk sinkronisasi penuh
-      // Gunakan action 'simpanSiswa' dengan format { list: students }
-      callGasBackend('simpanSiswa', { list: students });
+      // Kirim SATU data siswa ke backend (action harus sesuai dengan GAS: 'saveSiswa')
+      callGasBackend('saveSiswa', siswaData);
       closeSiswaModal();
       renderSiswaTable();
       showToast("Data siswa berhasil disimpan!");
@@ -2202,7 +2262,7 @@
     function deleteSiswa(nisn) {
       if (!confirm(`Yakin ingin menghapus siswa NISN ${nisn}?`)) return;
       students = students.filter(s => String(s.nisn) !== String(nisn));
-      callGasBackend('deleteSiswa', { nisn: nisn });
+      callGasBackend('deleteSiswa', nisn); // Kirim STRING langsung (sesuai harapan GAS)
       renderSiswaTable();
       showToast("Data siswa berhasil dihapus!");
     }
@@ -2318,9 +2378,8 @@
         teachers.push(guruData);
       }
 
-      // Kirim SELURUH daftar guru ke backend untuk sinkronisasi penuh
-      // Gunakan action 'simpanGuru' dengan format { list: teachers }
-      callGasBackend('simpanGuru', { list: teachers });
+      // Kirim SATU data guru ke backend (action harus sesuai dengan GAS: 'saveGuru')
+      callGasBackend('saveGuru', guruData);
       closeGuruModal();
       renderGuruTable();
       updateMapelDropdowns();
@@ -2330,7 +2389,7 @@
     function deleteGuru(nip) {
       if (!confirm(`Yakin ingin menghapus guru NIP ${nip}?`)) return;
       teachers = teachers.filter(g => String(g.nip) !== String(nip));
-      callGasBackend('deleteGuru', { nip: nip });
+      callGasBackend('deleteGuru', nip); // Kirim STRING langsung (sesuai harapan GAS)
       renderGuruTable();
       updateMapelDropdowns();
       showToast("Data guru berhasil dihapus!");
@@ -2367,7 +2426,7 @@
       }
 
       classList.push(nama);
-      callGasBackend('saveKelas', { nama: nama });
+      callGasBackend('saveKelas', nama); // Kirim STRING langsung (sesuai harapan GAS)
       document.getElementById('input-nama-kelas').value = '';
       updateAllDropdowns();
       renderKelasTable();
@@ -2377,7 +2436,7 @@
     function deleteKelas(nama) {
       if (!confirm(`Yakin ingin menghapus kelas ${nama}?`)) return;
       classList = classList.filter(k => k !== nama);
-      callGasBackend('deleteKelas', { nama: nama });
+      callGasBackend('deleteKelas', nama); // Kirim STRING langsung (sesuai harapan GAS)
       updateAllDropdowns();
       renderKelasTable();
       showToast("Kelas berhasil dihapus!");
@@ -2422,6 +2481,7 @@
         const json = XLSX.utils.sheet_to_json(worksheet);
 
         if (type === 'siswa') {
+          const siswaList = [];
           json.forEach(row => {
             const nisn = String(row.NISN || row.nisn || '').trim();
             const nama = String(row.Nama || row.nama || '').trim();
@@ -2431,14 +2491,23 @@
 
             if (nisn && nama) {
               const siswaObj = { nisn, nama, kelas, jk, nohp, fotoUrl: '' };
+              siswaList.push(siswaObj);
+              // Update state lokal juga
               const existingIdx = students.findIndex(s => String(s.nisn) === nisn);
               if (existingIdx !== -1) students[existingIdx] = siswaObj;
               else students.push(siswaObj);
-              callGasBackend('saveSiswa', siswaObj);
             }
           });
-          renderSiswaTable();
-          showToast("Berhasil mengimpor data siswa!");
+
+          if (siswaList.length > 0) {
+            // KIRIM SEMUA DATA SEKALI SAJA menggunakan action 'importSiswaData'
+            // (action ini sudah ada di GAS backend Anda)
+            callGasBackend('importSiswaData', siswaList);
+            renderSiswaTable();
+            showToast("Berhasil mengimpor " + siswaList.length + " data siswa! (Sedang menyinkronkan...)");
+          } else {
+            showToast("Tidak ada data valid di file Excel", "error");
+          }
         }
       };
       reader.readAsArrayBuffer(file);
