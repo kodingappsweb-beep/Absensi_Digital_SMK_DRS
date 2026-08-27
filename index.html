@@ -155,35 +155,133 @@
 
     @page {
       size: A4 portrait;
-      margin: 0;
+      margin: 13mm 15mm;
     }
+    
+    /* ============================================================
+       CSS KHUSUS SAAT DICETAK
+       KUNCI: visibility:hidden + #print-section dipaksa di posisi 0,0
+       dengan position:absolute. Elemen lain yang tersembunyi masih
+       "makan ruang", tapi #print-section "terbang" di atasnya.
+       ============================================================ */
     @media print {
-      body * { visibility: hidden; }
-      #print-section, #print-section * { visibility: visible; }
-      #print-section {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 210mm;
-        height: 297mm;
-        display: grid !important;
-        grid-template-columns: repeat(3, 54mm) !important;
-        grid-template-rows: repeat(3, 85mm) !important;
-        gap: 8mm !important;
-        padding: 13mm 16mm !important;
-        box-sizing: border-box;
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
       }
-      .kts-card {
-        page-break-inside: avoid;
-        break-inside: avoid;
+      
+      /* Sembunyikan semua elemen (masih makan ruang, tapi tidak terlihat) */
+      body * { visibility: hidden !important; }
+      
+      /* TAMPILKAN area cetak dan isinya */
+      #print-section, #print-section * { visibility: visible !important; }
+      
+      /* PAKSA #print-section berada tepat di POJOK KIRI-ATAS halaman 1 */
+      /* position:absolute membuatnya "terbang" dan mengabaikan elemen lain */
+      #print-section {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        display: block !important;
+        background: white !important;
+      }
+      
+      /* Setiap baris berisi 3 kartu dengan Flexbox */
+      .print-row {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+        gap: 8mm !important;
+        margin-bottom: 8mm !important;
+        height: 85mm !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .print-row:last-child {
+        margin-bottom: 0 !important;
+      }
+      
+      /* Setiap kartu: lebar tepat 54mm, tinggi 85mm */
+      .print-row .kts-card {
+        flex: 0 0 54mm !important;
+        width: 54mm !important;
+        max-width: 54mm !important;
+        height: 85mm !important;
+        margin: 0 !important;
         box-shadow: none !important;
         border: 1px solid #cbd5e1 !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        width: 54mm !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      
+      /* ELEMEN PEMISAH HALAMAN (di ANTARA halaman) */
+      .page-separator {
+        display: block !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        visibility: hidden !important;
+      }
+      
+      .no-print { display: none !important; }
+    }
+    
+    /* ============================================================
+       CSS KHUSUS TAMPILAN DI LAYAR (bukan cetak)
+       Setiap halaman tampil sebagai "kertas putih" yang berjajar
+       ============================================================ */
+    @media screen {
+      #print-section {
+        display: block !important;
+        padding: 20px !important;
+        background: #e2e8f0;
+      }
+      .print-page {
+        display: block !important;
+        position: relative !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        padding: 13mm 15mm !important;
+        box-sizing: border-box !important;
+        border: 1px solid #cbd5e1;
+        margin: 0 auto 24px auto !important;
+        background: white !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+        overflow: hidden !important;
+      }
+      .print-page:last-child {
+        margin-bottom: 0 !important;
+      }
+      .print-row {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+        gap: 8mm !important;
+        margin-bottom: 8mm !important;
         height: 85mm !important;
       }
-      .no-print { display: none !important; }
+      .print-row:last-child {
+        margin-bottom: 0 !important;
+      }
+      .print-row .kts-card {
+        flex: 0 0 54mm !important;
+        width: 54mm !important;
+        max-width: 54mm !important;
+        height: 85mm !important;
+        margin: 0 !important;
+      }
     }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -930,6 +1028,10 @@
           if (isWriteAction) isWritingToBackend = false;
         });
       }
+      
+      // Pastikan container tidak memiliki styling tinggi yang mengganggu
+      container.style.height = '';
+      container.style.position = '';
     }
 
     function applyBackendData(data) {
@@ -1874,12 +1976,42 @@
         return;
       }
 
-      listData.forEach((item, index) => {
-        const cardContainerId = `qr-card-item-${index}`;
-        const infoBadgeHtml = item.infoBadge ? `<div class="info-badge">${item.infoBadge}</div>` : '';
+      // Bagi kartu menjadi kelompok-kelompok: 1 halaman = 3 baris × 3 kartu = 9 kartu
+      const CARDS_PER_PAGE = 9;
+      const CARDS_PER_ROW = 3;
+      const totalPages = Math.ceil(listData.length / CARDS_PER_PAGE);
+      
+      for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+        const pageStart = pageIdx * CARDS_PER_PAGE;
+        const pageEnd = Math.min(pageStart + CARDS_PER_PAGE, listData.length);
+        const pageItems = listData.slice(pageStart, pageEnd);
+        
+        // Bungkus setiap halaman dalam .print-page
+        // Menggunakan page-break-after: always untuk memisahkan halaman cetak
+        const pageWrapperId = `print-page-${pageIdx}`;
+        container.insertAdjacentHTML('beforeend', `<div class="print-page" id="${pageWrapperId}"></div>`);
+        const pageContainer = document.getElementById(pageWrapperId);
+        
+        // Bagi halaman menjadi 3 baris, masing-masing 3 kartu
+        for (let rowIdx = 0; rowIdx < 3; rowIdx++) {
+          const rowStart = rowIdx * CARDS_PER_ROW;
+          const rowEnd = Math.min(rowStart + CARDS_PER_ROW, pageItems.length);
+          if (rowStart >= pageItems.length) break;
+          
+          const rowItems = pageItems.slice(rowStart, rowEnd);
+          
+          // Bungkus setiap baris dalam .print-row (Flexbox 3 kolom)
+          const rowWrapperId = `print-page-${pageIdx}-row-${rowIdx}`;
+          pageContainer.insertAdjacentHTML('beforeend', `<div class="print-row" id="${rowWrapperId}"></div>`);
+          const rowContainer = document.getElementById(rowWrapperId);
+          
+          rowItems.forEach((item, idxInRow) => {
+            const globalIndex = pageStart + rowStart + idxInRow;
+            const cardContainerId = `qr-card-item-${globalIndex}`;
+            const infoBadgeHtml = item.infoBadge ? `<div class="info-badge">${item.infoBadge}</div>` : '';
 
-        const cardHtml = `
-          <div class="kts-card">
+            const cardHtml = `
+              <div class="kts-card">
             <div class="card-header ${item.headerClass}">
               <img src="${logoSrc}" alt="Logo" class="logo">
               <h2>${schoolProfile.namaSekolah}</h2>
@@ -1906,23 +2038,34 @@
             </div>
           </div>
         `;
-        container.insertAdjacentHTML('beforeend', cardHtml);
+            rowContainer.insertAdjacentHTML('beforeend', cardHtml);
 
-        setTimeout(() => {
-          const qrTarget = document.getElementById(cardContainerId);
-          if (qrTarget) {
-            qrTarget.innerHTML = '';
-            new QRCode(qrTarget, {
-              text: String(item.id),
-              width: 60,
-              height: 60,
-              colorDark: "#0f172a",
-              colorLight: "#ffffff",
-              correctLevel: QRCode.CorrectLevel.H
-            });
-          }
-        }, 50);
-      });
+            setTimeout(() => {
+              const qrTarget = document.getElementById(cardContainerId);
+              if (qrTarget) {
+                qrTarget.innerHTML = '';
+                new QRCode(qrTarget, {
+                  text: String(item.id),
+                  width: 60,
+                  height: 60,
+                  colorDark: "#0f172a",
+                  colorLight: "#ffffff",
+                  correctLevel: QRCode.CorrectLevel.H
+                });
+              }
+            }, 50);
+          });
+        }
+        
+        // TAMBAHKAN ELEMEN PEMISAH HALAMAN (hanya DI ANTARA halaman, bukan setelah terakhir)
+        if (pageIdx < totalPages - 1) {
+          container.insertAdjacentHTML('beforeend', '<div class="page-separator"></div>');
+        }
+      }
+      
+      // Bersihkan styling container yang tidak perlu
+      container.style.height = '';
+      container.style.position = '';
     }
 
     /* ============ REKAP ABSENSI LOGIC ============ */
