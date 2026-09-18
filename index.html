@@ -156,7 +156,7 @@
     /* ============ KARTU BAGIAN BELAKANG (teks DIPUTAR 90° / landscape) - MODERN ============ */
     .kts-card-back {
       width: 54mm;
-      height: 85mm;
+      height: 84mm;
       background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
       border-radius: 12px;
       overflow: hidden;
@@ -362,12 +362,14 @@
         justify-content: space-between !important;
         align-items: flex-start !important;
         gap: 8mm !important;
-        margin-bottom: 8mm !important;
-        height: 85mm !important;
+        margin-bottom: 7mm !important;
+        height: 84mm !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        overflow: hidden !important;
       }
-      .print-row:last-child {
+      .print-row:last-child,
+      .print-row:last-of-type {
         margin-bottom: 0 !important;
       }
       
@@ -377,7 +379,7 @@
         flex: 0 0 54mm !important;
         width: 54mm !important;
         max-width: 54mm !important;
-        height: 85mm !important;
+        height: 84mm !important;
         margin: 0 !important;
         box-shadow: none !important;
         border: 1px solid #cbd5e1 !important;
@@ -385,6 +387,7 @@
         print-color-adjust: exact;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        overflow: hidden !important;
       }
       
       /* ELEMEN PEMISAH HALAMAN (di ANTARA halaman) */
@@ -434,10 +437,11 @@
         justify-content: space-between !important;
         align-items: flex-start !important;
         gap: 8mm !important;
-        margin-bottom: 8mm !important;
-        height: 85mm !important;
+        margin-bottom: 7mm !important;
+        height: 84mm !important;
       }
-      .print-row:last-child {
+      .print-row:last-child,
+      .print-row:last-of-type {
         margin-bottom: 0 !important;
       }
       .print-row .kts-card,
@@ -445,7 +449,7 @@
         flex: 0 0 54mm !important;
         width: 54mm !important;
         max-width: 54mm !important;
-        height: 85mm !important;
+        height: 84mm !important;
         margin: 0 !important;
       }
     }
