@@ -1916,6 +1916,7 @@
       
       const targetKelas = getActiveTeacherClass();
       if (targetKelas !== 'Semua' && student.kelas !== targetKelas) {
+        playBeep('error');
         showToast(`Peringatan: Siswa dari kelas ${student.kelas} (Bukan kelas ${targetKelas})`, "error");
         return;
       }
