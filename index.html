@@ -153,145 +153,10 @@
       font-weight: 600;
     }
 
-    /* ============ KARTU BAGIAN BELAKANG (rotasi 90°) ============ */
-    .kts-card-back {
-      width: 54mm;
-      height: 82mm;
-      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
-      border: 1.5px solid #e2e8f0;
-      position: relative;
-    }
-    .card-back-rotated {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 82mm;
-      height: 52mm;
-      transform: translate(-50%, -50%) rotate(90deg);
-      transform-origin: center center;
-      display: flex;
-      flex-direction: column;
-      background: #ffffff;
-      overflow: hidden;
-    }
-    .card-back-header {
-      background: linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #1e40af 100%);
-      color: #ffffff;
-      padding: 4px 10px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      flex-shrink: 0;
-      position: relative;
-      box-shadow: 0 2px 6px rgba(30, 64, 175, 0.3);
-    }
-    .card-back-header::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #fbbf24, transparent);
-    }
-    .card-back-header .logo-back {
-      width: 24px; height: 24px;
-      object-fit: contain;
-      background: #ffffff;
-      border-radius: 6px;
-      padding: 2px;
-      flex-shrink: 0;
-    }
-    .card-back-header .school-name-back {
-      font-size: 8.5px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      margin: 0;
-      text-transform: uppercase;
-      line-height: 1.2;
-    }
-    .card-back-body {
-      padding: 5px 10px 4px 10px;
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    }
-    .identity-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 3px;
-      gap: 6px;
-      padding-bottom: 2px;
-      border-bottom: 1px dashed #cbd5e1;
-    }
-    .identity-row:last-of-type {
-      border-bottom: none;
-      margin-bottom: 2px;
-    }
-    .identity-label {
-      font-size: 7px;
-      color: #000000;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      flex-shrink: 0;
-      min-width: 62px;
-      background: #eff6ff;
-      padding: 1px 5px;
-      border-radius: 4px;
-      border-left: 2px solid #3b82f6;
-    }
-    .identity-value {
-      font-size: 9px;
-      color: #000000;
-      font-weight: 700;
-      line-height: 1.2;
-      flex-grow: 1;
-    }
-    .card-note {
-      font-size: 6.5px;
-      color: #000000;
-      font-style: italic;
-      text-align: center;
-      line-height: 1.4;
-      padding: 3px 6px;
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-      border-radius: 6px;
-      border: 1px solid #f59e0b;
-      margin-top: 3px;
-      font-weight: 600;
-    }
-    .card-back-footer {
-      padding: 3px 10px;
-      font-size: 6px;
-      color: #000000;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 2px solid #1e40af;
-      background: linear-gradient(90deg, #f1f5f9 0%, #ffffff 50%, #f1f5f9 100%);
-      flex-shrink: 0;
-      font-weight: 700;
-    }
-    .card-back-footer span {
-      font-weight: 800;
-      color: #1e40af;
-    }
-    .card-back-footer .footer-right {
-      font-size: 5.5px;
-      color: #64748b;
-      font-weight: 600;
-    }
-
     /* ============ KARTU BAGIAN BELAKANG (teks DIPUTAR 90° / landscape) - MODERN ============ */
     .kts-card-back {
       width: 54mm;
-      height: 85mm;
+      height: 82mm;
       background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
       border-radius: 12px;
       overflow: hidden;
@@ -305,8 +170,8 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 85mm;
-      height: 54mm;
+      width: 82mm;
+      height: 52mm;
       transform: translate(-50%, -50%) rotate(90deg);
       transform-origin: center center;
       display: flex;
@@ -364,7 +229,7 @@
 
     /* BODY dengan layout identitas yang rapi */
     .card-back-body {
-      padding: 7px 12px 5px 12px;
+      padding: 5px 10px 4px 10px;
       flex-grow: 1;
       display: flex;
       flex-direction: column;
@@ -375,9 +240,9 @@
     .identity-row {
       display: flex;
       align-items: center;
-      margin-bottom: 4px;
-      gap: 8px;
-      padding-bottom: 3px;
+      margin-bottom: 3px;
+      gap: 6px;
+      padding-bottom: 2px;
       border-bottom: 1px dashed #cbd5e1;
     }
 
@@ -420,9 +285,10 @@
       background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
       border-radius: 6px;
       border: 1px solid #f59e0b;
-      margin-top: 5px;
+      margin-top: 3px;
       font-weight: 600;
       box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
+      padding: 3px 6px;
     }
 
     /* FOOTER modern dengan NPSN */
@@ -501,8 +367,10 @@
         height: 82mm !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        overflow: hidden !important;
       }
-      .print-row:last-child {
+      .print-row:last-child,
+      .print-row:last-of-type {
         margin-bottom: 0 !important;
       }
       
@@ -520,6 +388,47 @@
         print-color-adjust: exact;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        overflow: hidden !important;
+        position: relative !important;
+      }
+      
+      /* ==== ATURAN KHUSUS KARTU BELAKANG YANG DIPUTAR 90° ==== */
+      /* WAJIB ada di @media print agar rotasi berfungsi saat dicetak */
+      .print-row .kts-card-back .card-back-rotated {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        width: 82mm !important;
+        height: 52mm !important;
+        transform: translate(-50%, -50%) rotate(90deg) !important;
+        transform-origin: center center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        background-color: #ffffff !important;
+        overflow: hidden !important;
+        visibility: visible !important;
+      }
+      .print-row .kts-card-back .card-back-header {
+        display: flex !important;
+        flex-direction: row !important;
+        visibility: visible !important;
+      }
+      .print-row .kts-card-back .card-back-body {
+        display: flex !important;
+        flex-direction: column !important;
+        visibility: visible !important;
+      }
+      .print-row .kts-card-back .identity-row {
+        display: flex !important;
+        flex-direction: row !important;
+        visibility: visible !important;
+      }
+      .print-row .kts-card-back .card-back-footer {
+        display: flex !important;
+        visibility: visible !important;
+      }
+      .print-row .kts-card-back * {
+        visibility: visible !important;
       }
       
       /* ELEMEN PEMISAH HALAMAN (di ANTARA halaman) */
@@ -572,7 +481,8 @@
         margin-bottom: 6mm !important;
         height: 82mm !important;
       }
-      .print-row:last-child {
+      .print-row:last-child,
+      .print-row:last-of-type {
         margin-bottom: 0 !important;
       }
       .print-row .kts-card,
@@ -914,12 +824,6 @@
               <select id="kts-type-filter" onchange="renderKtsCards()" class="px-3 py-2 bg-slate-50 border rounded-xl text-xs font-semibold">
                 <option value="SISWA">Kartu Siswa (KTS)</option>
                 <option value="GURU">Kartu Guru (KTG)</option>
-              </select>
-              <span class="text-xs font-semibold text-slate-500 ml-2">Bagian:</span>
-              <select id="kts-side-filter" onchange="renderKtsCards()" class="px-3 py-2 bg-slate-50 border rounded-xl text-xs font-semibold">
-                <option value="DEPAN">Bagian Depan</option>
-                <option value="BELAKANG">Bagian Belakang</option>
-                <option value="DUA_DUA">Depan + Belakang</option>
               </select>
               <span class="text-xs font-semibold text-slate-500 ml-2">Bagian:</span>
               <select id="kts-side-filter" onchange="renderKtsCards()" class="px-3 py-2 bg-slate-50 border rounded-xl text-xs font-semibold">
@@ -1903,7 +1807,7 @@
           console.warn("Camera list fetch warning:", err);
         }
 
-        const config = { fps: 10, qrbox: { width: 200, height: 200 } };
+        const config = { fps: 20, qrbox: { width: 250, height: 250 }, useBarCodeDetectorIfSupported: true, aspectRatio: 1.333 };
 
         try {
           if (selectedAgendaCameraId) {
@@ -2135,8 +2039,10 @@
         }
 
         const config = {
-          fps: 10,
-          qrbox: { width: 220, height: 220 },
+          fps: 15,
+          qrbox: { width: 250, height: 250 },
+          useBarCodeDetectorIfSupported: true,
+          videoConstraints: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
           aspectRatio: 1.0
         };
 
@@ -2291,37 +2197,32 @@
         }));
       }
 
-      // Jika pilih DUA_DUA, duplikasi data: depan dulu, lalu belakang
-      let renderList = [];
-      if (sideFilter === 'DUA_DUA') {
-        // Bagian DEPAN dulu
-        listData.forEach(item => renderList.push({ ...item, side: 'DEPAN' }));
-        // Lalu bagian BELAKANG
-        listData.forEach(item => renderList.push({ ...item, side: 'BELAKANG' }));
-      } else {
-        listData.forEach(item => renderList.push({ ...item, side: sideFilter }));
-      }
-      listData = renderList;
-
-      // Fungsi: balik urutan per baris (mirror untuk PVC)
+      // ==== FUNGSI: Balik urutan per BARIS (setiap 3 kartu) ====
+      // Agar saat dicetak mirror & ditempel PVC, posisi depan-belakang tepat berpasangan
+      // Contoh: [A,B,C, D,E,F, G,H,I] → [C,B,A, F,E,D, I,H,G]
       function reversePerRow(arr, perRow = 3) {
         const hasil = [];
         for (let i = 0; i < arr.length; i += perRow) {
           const baris = arr.slice(i, i + perRow);
-          hasil.push(...baris.reverse());
+          hasil.push(...baris.reverse()); // Balik urutan dalam 1 baris
         }
         return hasil;
       }
 
+      // Jika pilih DUA_DUA, duplikasi data: depan dulu, lalu belakang (DIBALIK per baris)
       let renderList = [];
       if (sideFilter === 'DUA_DUA') {
+        // Bagian DEPAN: urutan NORMAL
         listData.forEach(item => renderList.push({ ...item, side: 'DEPAN' }));
+        // Bagian BELAKANG: urutan DIBALIK per baris (agar cocok saat ditempel)
         const dataBelakangDibalik = reversePerRow(listData, 3);
         dataBelakangDibalik.forEach(item => renderList.push({ ...item, side: 'BELAKANG' }));
       } else if (sideFilter === 'BELAKANG') {
+        // Jika hanya cetak BELAKANG saja: langsung dibalik per baris
         const dataDibalik = reversePerRow(listData, 3);
         dataDibalik.forEach(item => renderList.push({ ...item, side: 'BELAKANG' }));
       } else {
+        // DEPAN saja: urutan normal
         listData.forEach(item => renderList.push({ ...item, side: sideFilter }));
       }
       listData = renderList;
