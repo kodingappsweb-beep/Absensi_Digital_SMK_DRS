@@ -1371,6 +1371,14 @@
         }
       });
 
+      // Isi dropdown kelas guru (agenda-selected-class)
+      const agendaClassSel = document.getElementById('agenda-selected-class');
+      if (agendaClassSel) {
+        const curVal = agendaClassSel.value || '';
+        agendaClassSel.innerHTML = classOptionsOnly;
+        if (curVal) agendaClassSel.value = curVal;
+      }
+
       const fk = document.getElementById('form-kelas');
       if (fk) fk.innerHTML = classOptionsOnly;
 
