@@ -1791,6 +1791,17 @@
         const placeholder = document.getElementById('qr-placeholder-agenda');
         if (placeholder) placeholder.style.display = 'none';
 
+        // Pastikan container qr-reader-agenda memiliki dimensi yang jelas sebelum memulai scanner
+        const qrContainer = document.getElementById('qr-reader-agenda');
+        if (qrContainer) {
+          const parent = qrContainer.parentElement;
+          if (parent) {
+            qrContainer.style.width = parent.clientWidth + 'px';
+            qrContainer.style.minHeight = '260px';
+            qrContainer.style.display = 'block';
+          }
+        }
+
         if (html5QrAgenda && isAgendaCamActive) {
           try { await html5QrAgenda.stop(); } catch(e){}
         }
@@ -1813,10 +1824,10 @@
           if (selectedAgendaCameraId) {
             await html5QrAgenda.start(selectedAgendaCameraId, config, (txt) => processAgendaScan(txt), () => {});
           } else {
-            await html5QrAgenda.start({ facingMode: "environment" }, config, (txt) => processAgendaScan(txt), () => {});
+            await html5QrAgenda.start({ facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }, config, (txt) => processAgendaScan(txt), () => {});
           }
         } catch (err1) {
-          await html5QrAgenda.start({ facingMode: "user" }, config, (txt) => processAgendaScan(txt), () => {});
+          await html5QrAgenda.start({ facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, config, (txt) => processAgendaScan(txt), () => {});
         }
 
         isAgendaCamActive = true;
@@ -2009,6 +2020,17 @@
         const placeholder = document.getElementById('qr-placeholder');
         if (placeholder) placeholder.style.display = 'none';
 
+        // Pastikan container qr-reader memiliki dimensi yang jelas sebelum memulai scanner
+        const qrContainer = document.getElementById('qr-reader');
+        if (qrContainer) {
+          const parent = qrContainer.parentElement;
+          if (parent) {
+            qrContainer.style.width = parent.clientWidth + 'px';
+            qrContainer.style.minHeight = '280px';
+            qrContainer.style.display = 'block';
+          }
+        }
+
         setGeneralScanResult('waiting');
 
         if (html5QrScanner && isCameraActive) {
@@ -2042,8 +2064,7 @@
           fps: 15,
           qrbox: { width: 250, height: 250 },
           useBarCodeDetectorIfSupported: true,
-          videoConstraints: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-          aspectRatio: 1.0
+          aspectRatio: 1.333
         };
 
         try {
@@ -2056,7 +2077,7 @@
             );
           } else {
             await html5QrScanner.start(
-              { facingMode: generalCameraFacing },
+              { facingMode: generalCameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
               config,
               (txt) => processAttendanceScan(txt),
               () => {}
@@ -2068,7 +2089,7 @@
           try {
             selectedCameraId = null;
             await html5QrScanner.start(
-              { facingMode: generalCameraFacing },
+              { facingMode: generalCameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
               config,
               (txt) => processAttendanceScan(txt),
               () => {}
@@ -2077,7 +2098,7 @@
             const fallbackFacing = generalCameraFacing === 'environment' ? 'user' : 'environment';
             generalCameraFacing = fallbackFacing;
             await html5QrScanner.start(
-              { facingMode: fallbackFacing },
+              { facingMode: fallbackFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
               config,
               (txt) => processAttendanceScan(txt),
               () => {}
