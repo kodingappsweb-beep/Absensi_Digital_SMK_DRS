@@ -229,7 +229,7 @@
 
     /* BODY dengan layout identitas yang rapi */
     .card-back-body {
-      padding: 7px 12px 5px 12px;
+      padding: 5px 10px 4px 10px;
       flex-grow: 1;
       display: flex;
       flex-direction: column;
@@ -240,9 +240,9 @@
     .identity-row {
       display: flex;
       align-items: center;
-      margin-bottom: 4px;
-      gap: 8px;
-      padding-bottom: 3px;
+      margin-bottom: 3px;
+      gap: 6px;
+      padding-bottom: 2px;
       border-bottom: 1px dashed #cbd5e1;
     }
 
@@ -285,9 +285,10 @@
       background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
       border-radius: 6px;
       border: 1px solid #f59e0b;
-      margin-top: 5px;
+      margin-top: 3px;
       font-weight: 600;
       box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
+      padding: 3px 6px;
     }
 
     /* FOOTER modern dengan NPSN */
@@ -1806,7 +1807,7 @@
           console.warn("Camera list fetch warning:", err);
         }
 
-        const config = { fps: 10, qrbox: { width: 200, height: 200 } };
+        const config = { fps: 20, qrbox: { width: 250, height: 250 }, useBarCodeDetectorIfSupported: true, aspectRatio: 1.333 };
 
         try {
           if (selectedAgendaCameraId) {
