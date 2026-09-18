@@ -1816,7 +1816,7 @@
             await html5QrAgenda.start({ facingMode: "environment" }, config, (txt) => processAgendaScan(txt), () => {});
           }
         } catch (err1) {
-          await html5QrAgenda.start({ facingMode: "user" }, config, (txt) => processAgendaScan(txt), () => {});
+          await html5QrAgenda.start({ facingMode: "environment" }, config, (txt) => processAgendaScan(txt), () => {});
         }
 
         isAgendaCamActive = true;
@@ -2042,7 +2042,7 @@
           fps: 15,
           qrbox: { width: 250, height: 250 },
           useBarCodeDetectorIfSupported: true,
-          videoConstraints: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+          videoConstraints: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
           aspectRatio: 1.0
         };
 
