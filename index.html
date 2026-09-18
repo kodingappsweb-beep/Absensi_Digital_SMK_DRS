@@ -1847,6 +1847,68 @@
       return currentLoggedTeacher.kelas;
     }
 
+
+    // ============ SUARA NOTIFIKASI SCAN ============
+    let audioCtx = null;
+    function playBeep(type) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        const now = audioCtx.currentTime;
+        const gain = audioCtx.createGain();
+        gain.connect(audioCtx.destination);
+        
+        if (type === 'success') {
+          // Nada tinggi ceria: 2 beep cepat
+          const o1 = audioCtx.createOscillator();
+          o1.connect(gain);
+          o1.frequency.value = 880;
+          o1.type = 'sine';
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+          o1.start(now);
+          o1.stop(now + 0.15);
+          
+          const o2 = audioCtx.createOscillator();
+          const g2 = audioCtx.createGain();
+          o2.connect(g2);
+          g2.connect(audioCtx.destination);
+          o2.frequency.value = 1100;
+          o2.type = 'sine';
+          g2.gain.setValueAtTime(0.3, now + 0.12);
+          g2.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          o2.start(now + 0.12);
+          o2.stop(now + 0.3);
+        } else if (type === 'duplicate') {
+          // Nada sedang: 2 beep sedang
+          for (let i = 0; i < 2; i++) {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.frequency.value = 600;
+            o.type = 'square';
+            const t = now + i * 0.18;
+            g.gain.setValueAtTime(0.2, t);
+            g.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+            o.start(t);
+            o.stop(t + 0.12);
+          }
+        } else {
+          // Nada rendah panjang: error
+          const o = audioCtx.createOscillator();
+          o.connect(gain);
+          o.frequency.value = 220;
+          o.type = 'sawtooth';
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+          o.start(now);
+          o.stop(now + 0.4);
+        }
+      } catch(e) { console.warn('Audio tidak didukung:', e); }
+    }
+
     function processAgendaScan(nisnRaw) {
       const nisn = String(nisnRaw).trim();
       const student = students.find(s => String(s.nisn).trim() === nisn);
@@ -1958,10 +2020,11 @@
         if (isDuplicate) {
           showToast(`⚠️ ${nama} SUDAH absen untuk ${jenis}!`, "error");
           const resEl = document.getElementById('agenda-scan-result');
-          if (resEl) {
+          if (resEl && (currentUserRole === 'guru' || currentLoggedTeacher)) {
             resEl.innerHTML = `<div class="text-rose-600 font-bold text-sm"><i class="fa-solid fa-triangle-exclamation text-xl mb-1"></i><br>${nama} Sudah Absen (${jenis})!</div>`;
           }
           setGeneralScanResult('duplicate', nama, status, `Jenis sesi: ${jenis}`);
+          playBeep('duplicate');
         } else {
           const materiVal = document.getElementById('agenda-materi')?.value.trim() || '-';
 
@@ -1983,10 +2046,11 @@
           attendanceLogs.unshift(logEntry);
 
           const resEl = document.getElementById('agenda-scan-result');
-          if (resEl) {
+          if (resEl && (currentUserRole === 'guru' || currentLoggedTeacher)) {
             resEl.innerHTML = `<div class="text-emerald-600 font-bold text-sm"><i class="fa-solid fa-circle-check text-xl mb-1"></i><br>${nama} (${status}) Berhasil Dicatat!</div>`;
           }
           setGeneralScanResult('success', nama, status, jenis);
+          playBeep('success');
           showToast(`✅ Absen ${nama} tercatat`);
 
           callGasBackend('saveAbsensi', logEntry);
@@ -2129,6 +2193,7 @@
         return;
       }
 
+      playBeep('error');
       showToast("ID / QR Code tidak terdaftar dalam sistem", "error");
       setGeneralScanResult('error', '', '', 'ID / QR Code tidak terdaftar dalam sistem.');
     }
