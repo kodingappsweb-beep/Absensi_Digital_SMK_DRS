@@ -156,7 +156,7 @@
     /* ============ KARTU BAGIAN BELAKANG (teks DIPUTAR 90° / landscape) - MODERN ============ */
     .kts-card-back {
       width: 54mm;
-      height: 84mm;
+      height: 82mm;
       background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
       border-radius: 12px;
       overflow: hidden;
@@ -170,8 +170,8 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 85mm;
-      height: 54mm;
+      width: 82mm;
+      height: 52mm;
       transform: translate(-50%, -50%) rotate(90deg);
       transform-origin: center center;
       display: flex;
@@ -363,8 +363,8 @@
         justify-content: space-between !important;
         align-items: flex-start !important;
         gap: 8mm !important;
-        margin-bottom: 7mm !important;
-        height: 84mm !important;
+        margin-bottom: 6mm !important;
+        height: 82mm !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         overflow: hidden !important;
@@ -380,7 +380,7 @@
         flex: 0 0 54mm !important;
         width: 54mm !important;
         max-width: 54mm !important;
-        height: 84mm !important;
+        height: 82mm !important;
         margin: 0 !important;
         box-shadow: none !important;
         border: 1px solid #cbd5e1 !important;
@@ -398,8 +398,8 @@
         position: absolute !important;
         top: 50% !important;
         left: 50% !important;
-        width: 84mm !important;
-        height: 54mm !important;
+        width: 82mm !important;
+        height: 52mm !important;
         transform: translate(-50%, -50%) rotate(90deg) !important;
         transform-origin: center center !important;
         display: flex !important;
@@ -1807,7 +1807,7 @@
           console.warn("Camera list fetch warning:", err);
         }
 
-        const config = { fps: 20, qrbox: { width: 250, height: 250 }, useBarCodeDetectorIfSupported: true, aspectRatio: 1.333 };
+        const config = { fps: 15, qrbox: { width: 250, height: 250 }, useBarCodeDetectorIfSupported: true, videoConstraints: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } };
 
         try {
           if (selectedAgendaCameraId) {
