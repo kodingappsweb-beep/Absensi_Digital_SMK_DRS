@@ -478,8 +478,8 @@
         justify-content: space-between !important;
         align-items: flex-start !important;
         gap: 8mm !important;
-        margin-bottom: 7mm !important;
-        height: 84mm !important;
+        margin-bottom: 6mm !important;
+        height: 82mm !important;
       }
       .print-row:last-child,
       .print-row:last-of-type {
@@ -490,7 +490,7 @@
         flex: 0 0 54mm !important;
         width: 54mm !important;
         max-width: 54mm !important;
-        height: 84mm !important;
+        height: 82mm !important;
         margin: 0 !important;
       }
     }
@@ -1807,7 +1807,7 @@
           console.warn("Camera list fetch warning:", err);
         }
 
-        const config = { fps: 15, qrbox: { width: 250, height: 250 }, useBarCodeDetectorIfSupported: true, videoConstraints: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } };
+        const config = { fps: 20, qrbox: { width: 250, height: 250 }, useBarCodeDetectorIfSupported: true, aspectRatio: 1.333 };
 
         try {
           if (selectedAgendaCameraId) {
@@ -2039,8 +2039,10 @@
         }
 
         const config = {
-          fps: 10,
-          qrbox: { width: 220, height: 220 },
+          fps: 15,
+          qrbox: { width: 250, height: 250 },
+          useBarCodeDetectorIfSupported: true,
+          videoConstraints: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
           aspectRatio: 1.0
         };
 
