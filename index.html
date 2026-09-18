@@ -498,6 +498,26 @@
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    
+    /* Perbaikan khusus html5-qrcode agar video & area scan QR tampil optimal */
+    #qr-reader video, #qr-reader-agenda video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      display: block !important;
+    }
+    #qr-reader canvas, #qr-reader-agenda canvas {
+      max-width: 100% !important;
+      display: block !important;
+    }
+    #qr-reader__scan_region, #qr-reader-agenda__scan_region {
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 260px !important;
+    }
+    #qr-reader__dashboard, #qr-reader-agenda__dashboard {
+      display: none !important;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-500 selection:text-white">
@@ -1112,6 +1132,83 @@
     let pieChartInstance = null;
     let editingSiswaNisn = null, editingGuruNip = null;
     let isWritingToBackend = false; // Flag kunci: true saat sedang simpan/hapus/import
+    
+    // ==== FUNGSI SUARA NOTIFIKASI (BERHASIL & GAGAL) ====
+    let audioContext = null;
+    function getAudioContext() {
+      if (!audioContext) {
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+          console.warn("Web Audio API tidak didukung:", e);
+          return null;
+        }
+      }
+      return audioContext;
+    }
+    function playBeepSuccess() {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      try {
+        if (ctx.state === 'suspended') ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        // Nada 1: C6 (1046.5 Hz)
+        osc.frequency.setValueAtTime(1046.5, ctx.currentTime);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.15);
+        // Nada 2: E6 (1318.5 Hz) setelah jeda singkat
+        setTimeout(() => {
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(1318.5, ctx.currentTime);
+          gain2.gain.setValueAtTime(0.25, ctx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+          osc2.start(ctx.currentTime);
+          osc2.stop(ctx.currentTime + 0.2);
+        }, 120);
+      } catch (e) { console.warn("Gagal memutar suara berhasil:", e); }
+    }
+    function playBeepError() {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      try {
+        if (ctx.state === 'suspended') ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        // Nada rendah: G3 (196 Hz) - pendek dan tajam
+        osc.frequency.setValueAtTime(196, ctx.currentTime);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.25);
+        // Nada kedua lebih rendah: E3 (164.8 Hz)
+        setTimeout(() => {
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.type = 'square';
+          osc2.frequency.setValueAtTime(164.8, ctx.currentTime);
+          gain2.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+          osc2.start(ctx.currentTime);
+          osc2.stop(ctx.currentTime + 0.3);
+        }, 180);
+      } catch (e) { console.warn("Gagal memutar suara gagal:", e); }
+    }
+    // ==== AKHIR FUNGSI SUARA NOTIFIKASI ====
 
     // ==== FUNGSI PENYIMPANAN SESI LOGIN (localStorage) ====
     function saveSessionToStorage() {
@@ -1818,7 +1915,7 @@
           console.warn("Camera list fetch warning:", err);
         }
 
-        const config = { fps: 20, qrbox: { width: 250, height: 250 }, useBarCodeDetectorIfSupported: true, aspectRatio: 1.333 };
+        const config = { fps: 20, qrbox: { width: 220, height: 220 }, disableFlip: false };
 
         try {
           if (selectedAgendaCameraId) {
@@ -1861,11 +1958,12 @@
     function processAgendaScan(nisnRaw) {
       const nisn = String(nisnRaw).trim();
       const student = students.find(s => String(s.nisn).trim() === nisn);
-      if (!student) { showToast("Siswa tidak ditemukan", "error"); return; }
+      if (!student) { showToast("Siswa tidak ditemukan", "error"); playBeepError(); return; }
       
       const targetKelas = getActiveTeacherClass();
       if (targetKelas !== 'Semua' && student.kelas !== targetKelas) {
         showToast(`Peringatan: Siswa dari kelas ${student.kelas} (Bukan kelas ${targetKelas})`, "error");
+        playBeepError();
         return;
       }
       
@@ -1973,6 +2071,7 @@
             resEl.innerHTML = `<div class="text-rose-600 font-bold text-sm"><i class="fa-solid fa-triangle-exclamation text-xl mb-1"></i><br>${nama} Sudah Absen (${jenis})!</div>`;
           }
           setGeneralScanResult('duplicate', nama, status, `Jenis sesi: ${jenis}`);
+          playBeepError();
         } else {
           const materiVal = document.getElementById('agenda-materi')?.value.trim() || '-';
 
@@ -1999,6 +2098,7 @@
           }
           setGeneralScanResult('success', nama, status, jenis);
           showToast(`✅ Absen ${nama} tercatat`);
+          playBeepSuccess();
 
           callGasBackend('saveAbsensi', logEntry);
           refreshCurrentViewData();
@@ -2006,6 +2106,7 @@
       } catch (err) {
         console.error("Error catat absensi:", err);
         setGeneralScanResult('error', nama, status, 'Terjadi kesalahan saat mencatat absensi.');
+        playBeepError();
       } finally {
         setTimeout(() => { isScanProcessing = false; }, 1200);
       }
@@ -2061,10 +2162,9 @@
         }
 
         const config = {
-          fps: 15,
-          qrbox: { width: 250, height: 250 },
-          useBarCodeDetectorIfSupported: true,
-          aspectRatio: 1.333
+          fps: 20,
+          qrbox: { width: 220, height: 220 },
+          disableFlip: false
         };
 
         try {
@@ -2152,6 +2252,7 @@
 
       showToast("ID / QR Code tidak terdaftar dalam sistem", "error");
       setGeneralScanResult('error', '', '', 'ID / QR Code tidak terdaftar dalam sistem.');
+      playBeepError();
     }
 
     function handleManualInput(e) {
