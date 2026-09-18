@@ -1690,11 +1690,19 @@
 
       const classSelectorWrapper = document.getElementById('teacher-class-selector-wrapper');
       const agendaClassSel = document.getElementById('agenda-selected-class');
-      if (currentLoggedTeacher.kelas === 'Semua') {
-        classSelectorWrapper.classList.remove('hidden');
-        agendaClassSel.innerHTML = classList.map(k => `<option value="${k}">${k}</option>`).join('');
-      } else {
-        classSelectorWrapper.classList.add('hidden');
+      // Selalu tampilkan dropdown kelas (jangan hidden)
+      if (classSelectorWrapper) classSelectorWrapper.classList.remove('hidden');
+      // Isi dropdown: jika classList kosong, ambil dari data siswa
+      let kelasOptions = classList && classList.length > 0 ? classList : [];
+      if (kelasOptions.length === 0 && students && students.length > 0) {
+        kelasOptions = [...new Set(students.map(s => s.kelas).filter(k => k))].sort();
+      }
+      if (agendaClassSel && kelasOptions.length > 0) {
+        agendaClassSel.innerHTML = kelasOptions.map(k => `<option value="${k}">${k}</option>`).join('');
+        // Jika guru punya kelas tertentu, pilihkan sebagai default
+        if (currentLoggedTeacher && currentLoggedTeacher.kelas && currentLoggedTeacher.kelas !== 'Semua') {
+          agendaClassSel.value = currentLoggedTeacher.kelas;
+        }
       }
     }
 
