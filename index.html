@@ -499,30 +499,15 @@
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     
-    /* Perbaikan khusus html5-qrcode agar video & area scan QR tampil optimal */
+    /* Perbaikan agar video QR scanner tidak terbelah di HP */
     #qr-reader video, #qr-reader-agenda video {
       width: 100% !important;
       height: auto !important;
       display: block !important;
     }
-    #qr-reader canvas, #qr-reader-agenda canvas {
-      max-width: 100% !important;
-      display: block !important;
-    }
-    #qr-reader__scan_region, #qr-reader-agenda__scan_region {
-      width: 100% !important;
-      min-height: 280px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      background: #000 !important;
-      overflow: hidden !important;
-    }
     #qr-reader__scan_region video, #qr-reader-agenda__scan_region video {
-      width: 100% !important;
-      height: 100% !important;
-      max-height: 450px !important;
       object-fit: contain !important;
+      max-height: 400px !important;
     }
     #qr-reader__dashboard, #qr-reader-agenda__dashboard {
       display: none !important;
@@ -1141,83 +1126,6 @@
     let pieChartInstance = null;
     let editingSiswaNisn = null, editingGuruNip = null;
     let isWritingToBackend = false; // Flag kunci: true saat sedang simpan/hapus/import
-    
-    // ==== FUNGSI SUARA NOTIFIKASI (BERHASIL & GAGAL) ====
-    let audioContext = null;
-    function getAudioContext() {
-      if (!audioContext) {
-        try {
-          audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (e) {
-          console.warn("Web Audio API tidak didukung:", e);
-          return null;
-        }
-      }
-      return audioContext;
-    }
-    function playBeepSuccess() {
-      const ctx = getAudioContext();
-      if (!ctx) return;
-      try {
-        if (ctx.state === 'suspended') ctx.resume();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        // Nada 1: C6 (1046.5 Hz)
-        osc.frequency.setValueAtTime(1046.5, ctx.currentTime);
-        gain.gain.setValueAtTime(0.25, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.15);
-        // Nada 2: E6 (1318.5 Hz) setelah jeda singkat
-        setTimeout(() => {
-          const osc2 = ctx.createOscillator();
-          const gain2 = ctx.createGain();
-          osc2.connect(gain2);
-          gain2.connect(ctx.destination);
-          osc2.type = 'sine';
-          osc2.frequency.setValueAtTime(1318.5, ctx.currentTime);
-          gain2.gain.setValueAtTime(0.25, ctx.currentTime);
-          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-          osc2.start(ctx.currentTime);
-          osc2.stop(ctx.currentTime + 0.2);
-        }, 120);
-      } catch (e) { console.warn("Gagal memutar suara berhasil:", e); }
-    }
-    function playBeepError() {
-      const ctx = getAudioContext();
-      if (!ctx) return;
-      try {
-        if (ctx.state === 'suspended') ctx.resume();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'square';
-        // Nada rendah: G3 (196 Hz) - pendek dan tajam
-        osc.frequency.setValueAtTime(196, ctx.currentTime);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.25);
-        // Nada kedua lebih rendah: E3 (164.8 Hz)
-        setTimeout(() => {
-          const osc2 = ctx.createOscillator();
-          const gain2 = ctx.createGain();
-          osc2.connect(gain2);
-          gain2.connect(ctx.destination);
-          osc2.type = 'square';
-          osc2.frequency.setValueAtTime(164.8, ctx.currentTime);
-          gain2.gain.setValueAtTime(0.2, ctx.currentTime);
-          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-          osc2.start(ctx.currentTime);
-          osc2.stop(ctx.currentTime + 0.3);
-        }, 180);
-      } catch (e) { console.warn("Gagal memutar suara gagal:", e); }
-    }
-    // ==== AKHIR FUNGSI SUARA NOTIFIKASI ====
 
     // ==== FUNGSI PENYIMPANAN SESI LOGIN (localStorage) ====
     function saveSessionToStorage() {
@@ -1897,17 +1805,6 @@
         const placeholder = document.getElementById('qr-placeholder-agenda');
         if (placeholder) placeholder.style.display = 'none';
 
-        // Pastikan container qr-reader-agenda memiliki dimensi yang jelas sebelum memulai scanner
-        const qrContainer = document.getElementById('qr-reader-agenda');
-        if (qrContainer) {
-          const parent = qrContainer.parentElement;
-          if (parent) {
-            qrContainer.style.width = parent.clientWidth + 'px';
-            qrContainer.style.minHeight = '260px';
-            qrContainer.style.display = 'block';
-          }
-        }
-
         if (html5QrAgenda && isAgendaCamActive) {
           try { await html5QrAgenda.stop(); } catch(e){}
         }
@@ -1924,45 +1821,16 @@
           console.warn("Camera list fetch warning:", err);
         }
 
-        const config = { fps: 30, qrbox: { width: 280, height: 280 }, disableFlip: false, rememberLastUsedCamera: true, supportedScanTypes: [0] };
+        const config = { fps: 30, qrbox: { width: 260, height: 260 }, aspectRatio: 1.333, supportedScanTypes: [0] };
 
-        let cameraStarted = false;
-        
-        // Strategi 1: Coba dengan deviceId spesifik (jika ada)
-        if (selectedAgendaCameraId) {
-          try {
+        try {
+          if (selectedAgendaCameraId) {
             await html5QrAgenda.start(selectedAgendaCameraId, config, (txt) => processAgendaScan(txt), () => {});
-            cameraStarted = true;
-          } catch (e1) {
-            console.warn("Agenda Strategi 1 (deviceId) gagal:", e1);
-          }
-        }
-        
-        // Strategi 2: Coba dengan facingMode environment
-        if (!cameraStarted) {
-          try {
-            try { if (html5QrAgenda) { await html5QrAgenda.stop(); } } catch(e){}
-            html5QrAgenda = new Html5Qrcode("qr-reader-agenda");
+          } else {
             await html5QrAgenda.start({ facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }, config, (txt) => processAgendaScan(txt), () => {});
-            cameraStarted = true;
-            selectedAgendaCameraId = null;
-          } catch (e2) {
-            console.warn("Agenda Strategi 2 (environment) gagal:", e2);
           }
-        }
-        
-        // Strategi 3: Coba dengan facingMode user
-        if (!cameraStarted) {
-          try {
-            try { if (html5QrAgenda) { await html5QrAgenda.stop(); } } catch(e){}
-            html5QrAgenda = new Html5Qrcode("qr-reader-agenda");
-            await html5QrAgenda.start({ facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, config, (txt) => processAgendaScan(txt), () => {});
-            cameraStarted = true;
-            selectedAgendaCameraId = null;
-          } catch (e3) {
-            console.warn("Agenda Strategi 3 (user) gagal:", e3);
-            throw e3;
-          }
+        } catch (err1) {
+          await html5QrAgenda.start({ facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, config, (txt) => processAgendaScan(txt), () => {});
         }
 
         isAgendaCamActive = true;
@@ -1996,12 +1864,11 @@
     function processAgendaScan(nisnRaw) {
       const nisn = String(nisnRaw).trim();
       const student = students.find(s => String(s.nisn).trim() === nisn);
-      if (!student) { showToast("Siswa tidak ditemukan", "error"); playBeepError(); return; }
+      if (!student) { showToast("Siswa tidak ditemukan", "error"); return; }
       
       const targetKelas = getActiveTeacherClass();
       if (targetKelas !== 'Semua' && student.kelas !== targetKelas) {
         showToast(`Peringatan: Siswa dari kelas ${student.kelas} (Bukan kelas ${targetKelas})`, "error");
-        playBeepError();
         return;
       }
       
@@ -2109,7 +1976,6 @@
             resEl.innerHTML = `<div class="text-rose-600 font-bold text-sm"><i class="fa-solid fa-triangle-exclamation text-xl mb-1"></i><br>${nama} Sudah Absen (${jenis})!</div>`;
           }
           setGeneralScanResult('duplicate', nama, status, `Jenis sesi: ${jenis}`);
-          playBeepError();
         } else {
           const materiVal = document.getElementById('agenda-materi')?.value.trim() || '-';
 
@@ -2136,7 +2002,6 @@
           }
           setGeneralScanResult('success', nama, status, jenis);
           showToast(`✅ Absen ${nama} tercatat`);
-          playBeepSuccess();
 
           callGasBackend('saveAbsensi', logEntry);
           refreshCurrentViewData();
@@ -2144,7 +2009,6 @@
       } catch (err) {
         console.error("Error catat absensi:", err);
         setGeneralScanResult('error', nama, status, 'Terjadi kesalahan saat mencatat absensi.');
-        playBeepError();
       } finally {
         setTimeout(() => { isScanProcessing = false; }, 1200);
       }
@@ -2158,17 +2022,6 @@
       try {
         const placeholder = document.getElementById('qr-placeholder');
         if (placeholder) placeholder.style.display = 'none';
-
-        // Pastikan container qr-reader memiliki dimensi yang jelas sebelum memulai scanner
-        const qrContainer = document.getElementById('qr-reader');
-        if (qrContainer) {
-          const parent = qrContainer.parentElement;
-          if (parent) {
-            qrContainer.style.width = parent.clientWidth + 'px';
-            qrContainer.style.minHeight = '280px';
-            qrContainer.style.display = 'block';
-          }
-        }
 
         setGeneralScanResult('waiting');
 
@@ -2201,67 +2054,47 @@
 
         const config = {
           fps: 30,
-          qrbox: { width: 280, height: 280 },
-          disableFlip: false,
-          rememberLastUsedCamera: true,
+          qrbox: { width: 260, height: 260 },
+          aspectRatio: 1.333,
           supportedScanTypes: [0]
         };
 
-        let cameraStarted = false;
-        
-        // Strategi 1: Coba dengan deviceId spesifik (jika ada)
-        if (selectedCameraId) {
-          try {
+        try {
+          if (selectedCameraId) {
             await html5QrScanner.start(
               selectedCameraId,
               config,
               (txt) => processAttendanceScan(txt),
               () => {}
             );
-            cameraStarted = true;
-          } catch (e1) {
-            console.warn("Strategi 1 (deviceId) gagal:", e1);
-          }
-        }
-        
-        // Strategi 2: Jika belum berhasil, coba dengan facingMode environment
-        if (!cameraStarted) {
-          try {
-            // Buat instance baru untuk memastikan tidak ada state error
-            try { if (html5QrScanner) { await html5QrScanner.stop(); } } catch(e){}
-            html5QrScanner = new Html5Qrcode("qr-reader");
+          } else {
             await html5QrScanner.start(
-              { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+              { facingMode: generalCameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
               config,
               (txt) => processAttendanceScan(txt),
               () => {}
             );
-            cameraStarted = true;
-            generalCameraFacing = 'environment';
-            selectedCameraId = null;
-          } catch (e2) {
-            console.warn("Strategi 2 (environment) gagal:", e2);
           }
-        }
-        
-        // Strategi 3: Jika belum berhasil, coba dengan facingMode user
-        if (!cameraStarted) {
+        } catch (err1) {
+          console.warn("Kamera utama gagal, mencoba mode alternatif:", err1);
+
           try {
-            try { if (html5QrScanner) { await html5QrScanner.stop(); } } catch(e){}
-            html5QrScanner = new Html5Qrcode("qr-reader");
+            selectedCameraId = null;
             await html5QrScanner.start(
-              { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+              { facingMode: generalCameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
               config,
               (txt) => processAttendanceScan(txt),
               () => {}
             );
-            cameraStarted = true;
-            generalCameraFacing = 'user';
-            selectedCameraId = null;
-          } catch (e3) {
-            console.warn("Strategi 3 (user) gagal:", e3);
-            // Jika semua strategi gagal, lempar error ke blok catch luar
-            throw e3;
+          } catch (err2) {
+            const fallbackFacing = generalCameraFacing === 'environment' ? 'user' : 'environment';
+            generalCameraFacing = fallbackFacing;
+            await html5QrScanner.start(
+              { facingMode: fallbackFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
+              config,
+              (txt) => processAttendanceScan(txt),
+              () => {}
+            );
           }
         }
 
@@ -2277,9 +2110,8 @@
         isCameraActive = false;
         const placeholder = document.getElementById('qr-placeholder');
         if (placeholder) placeholder.style.display = 'block';
-        const errMsg = "Gagal membuka kamera. Kemungkinan penyebab:\n1. Kamera sedang digunakan aplikasi lain (Zoom, Meet, dll)\n2. Izin kamera belum diizinkan di browser\n3. Coba refresh halaman atau ganti browser\n4. Pastikan driver kamera laptop terinstall";
-        setGeneralScanResult('error', '', '', 'Gagal membuka kamera. Lihat pesan untuk solusi.');
-        alert(errMsg);
+        setGeneralScanResult('error', '', '', 'Gagal membuka kamera. Pastikan izin kamera telah diberikan di browser.');
+        alert("Gagal membuka kamera. Pastikan izin kamera telah diberikan di browser.");
       }
     }
 
@@ -2312,7 +2144,6 @@
 
       showToast("ID / QR Code tidak terdaftar dalam sistem", "error");
       setGeneralScanResult('error', '', '', 'ID / QR Code tidak terdaftar dalam sistem.');
-      playBeepError();
     }
 
     function handleManualInput(e) {
