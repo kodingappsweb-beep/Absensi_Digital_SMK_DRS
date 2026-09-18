@@ -388,6 +388,46 @@
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         overflow: hidden !important;
+        position: relative !important;
+      }
+      
+      /* ==== ATURAN KHUSUS KARTU BELAKANG YANG DIPUTAR 90° ==== */
+      /* WAJIB ada di @media print agar rotasi berfungsi saat dicetak */
+      .print-row .kts-card-back .card-back-rotated {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        width: 84mm !important;
+        height: 54mm !important;
+        transform: translate(-50%, -50%) rotate(90deg) !important;
+        transform-origin: center center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        background-color: #ffffff !important;
+        overflow: hidden !important;
+        visibility: visible !important;
+      }
+      .print-row .kts-card-back .card-back-header {
+        display: flex !important;
+        flex-direction: row !important;
+        visibility: visible !important;
+      }
+      .print-row .kts-card-back .card-back-body {
+        display: flex !important;
+        flex-direction: column !important;
+        visibility: visible !important;
+      }
+      .print-row .kts-card-back .identity-row {
+        display: flex !important;
+        flex-direction: row !important;
+        visibility: visible !important;
+      }
+      .print-row .kts-card-back .card-back-footer {
+        display: flex !important;
+        visibility: visible !important;
+      }
+      .print-row .kts-card-back * {
+        visibility: visible !important;
       }
       
       /* ELEMEN PEMISAH HALAMAN (di ANTARA halaman) */
