@@ -156,7 +156,7 @@
     /* ============ KARTU BAGIAN BELAKANG (teks DIPUTAR 90° / landscape) - MODERN ============ */
     .kts-card-back {
       width: 54mm;
-      height: 82mm;
+      height: 84mm;
       background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
       border-radius: 12px;
       overflow: hidden;
@@ -170,8 +170,8 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 82mm;
-      height: 52mm;
+      width: 85mm;
+      height: 54mm;
       transform: translate(-50%, -50%) rotate(90deg);
       transform-origin: center center;
       display: flex;
@@ -229,7 +229,7 @@
 
     /* BODY dengan layout identitas yang rapi */
     .card-back-body {
-      padding: 5px 10px 4px 10px;
+      padding: 7px 12px 5px 12px;
       flex-grow: 1;
       display: flex;
       flex-direction: column;
@@ -240,9 +240,9 @@
     .identity-row {
       display: flex;
       align-items: center;
-      margin-bottom: 3px;
-      gap: 6px;
-      padding-bottom: 2px;
+      margin-bottom: 4px;
+      gap: 8px;
+      padding-bottom: 3px;
       border-bottom: 1px dashed #cbd5e1;
     }
 
@@ -285,10 +285,9 @@
       background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
       border-radius: 6px;
       border: 1px solid #f59e0b;
-      margin-top: 3px;
+      margin-top: 5px;
       font-weight: 600;
       box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
-      padding: 3px 6px;
     }
 
     /* FOOTER modern dengan NPSN */
@@ -363,8 +362,8 @@
         justify-content: space-between !important;
         align-items: flex-start !important;
         gap: 8mm !important;
-        margin-bottom: 6mm !important;
-        height: 82mm !important;
+        margin-bottom: 7mm !important;
+        height: 84mm !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         overflow: hidden !important;
@@ -380,7 +379,7 @@
         flex: 0 0 54mm !important;
         width: 54mm !important;
         max-width: 54mm !important;
-        height: 82mm !important;
+        height: 84mm !important;
         margin: 0 !important;
         box-shadow: none !important;
         border: 1px solid #cbd5e1 !important;
@@ -398,8 +397,8 @@
         position: absolute !important;
         top: 50% !important;
         left: 50% !important;
-        width: 82mm !important;
-        height: 52mm !important;
+        width: 84mm !important;
+        height: 54mm !important;
         transform: translate(-50%, -50%) rotate(90deg) !important;
         transform-origin: center center !important;
         display: flex !important;
@@ -478,8 +477,8 @@
         justify-content: space-between !important;
         align-items: flex-start !important;
         gap: 8mm !important;
-        margin-bottom: 6mm !important;
-        height: 82mm !important;
+        margin-bottom: 7mm !important;
+        height: 84mm !important;
       }
       .print-row:last-child,
       .print-row:last-of-type {
@@ -490,7 +489,7 @@
         flex: 0 0 54mm !important;
         width: 54mm !important;
         max-width: 54mm !important;
-        height: 82mm !important;
+        height: 84mm !important;
         margin: 0 !important;
       }
     }
@@ -498,20 +497,6 @@
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    
-    /* Perbaikan agar video QR scanner tidak terbelah di HP */
-    #qr-reader video, #qr-reader-agenda video {
-      width: 100% !important;
-      height: auto !important;
-      display: block !important;
-    }
-    #qr-reader__scan_region video, #qr-reader-agenda__scan_region video {
-      object-fit: contain !important;
-      max-height: 400px !important;
-    }
-    #qr-reader__dashboard, #qr-reader-agenda__dashboard {
-      display: none !important;
-    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-500 selection:text-white">
@@ -1821,16 +1806,16 @@
           console.warn("Camera list fetch warning:", err);
         }
 
-        const config = { fps: 30, qrbox: { width: 260, height: 260 }, aspectRatio: 1.333, supportedScanTypes: [0] };
+        const config = { fps: 10, qrbox: { width: 200, height: 200 } };
 
         try {
           if (selectedAgendaCameraId) {
             await html5QrAgenda.start(selectedAgendaCameraId, config, (txt) => processAgendaScan(txt), () => {});
           } else {
-            await html5QrAgenda.start({ facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }, config, (txt) => processAgendaScan(txt), () => {});
+            await html5QrAgenda.start({ facingMode: "environment" }, config, (txt) => processAgendaScan(txt), () => {});
           }
         } catch (err1) {
-          await html5QrAgenda.start({ facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, config, (txt) => processAgendaScan(txt), () => {});
+          await html5QrAgenda.start({ facingMode: "user" }, config, (txt) => processAgendaScan(txt), () => {});
         }
 
         isAgendaCamActive = true;
@@ -2053,10 +2038,9 @@
         }
 
         const config = {
-          fps: 30,
-          qrbox: { width: 260, height: 260 },
-          aspectRatio: 1.333,
-          supportedScanTypes: [0]
+          fps: 10,
+          qrbox: { width: 220, height: 220 },
+          aspectRatio: 1.0
         };
 
         try {
@@ -2069,7 +2053,7 @@
             );
           } else {
             await html5QrScanner.start(
-              { facingMode: generalCameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
+              { facingMode: generalCameraFacing },
               config,
               (txt) => processAttendanceScan(txt),
               () => {}
@@ -2081,7 +2065,7 @@
           try {
             selectedCameraId = null;
             await html5QrScanner.start(
-              { facingMode: generalCameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
+              { facingMode: generalCameraFacing },
               config,
               (txt) => processAttendanceScan(txt),
               () => {}
@@ -2090,7 +2074,7 @@
             const fallbackFacing = generalCameraFacing === 'environment' ? 'user' : 'environment';
             generalCameraFacing = fallbackFacing;
             await html5QrScanner.start(
-              { facingMode: fallbackFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
+              { facingMode: fallbackFacing },
               config,
               (txt) => processAttendanceScan(txt),
               () => {}
