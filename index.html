@@ -1981,9 +1981,6 @@
           </div>
           <h4 class="font-bold text-emerald-700 text-base">${safe(nama)} (${safe(status)})</h4>
           <p class="text-xs text-emerald-600 mt-1">Berhasil dicatat • ${safe(detail)}</p>`;
-        setTimeout(() => {
-          if (currentActiveView === 'scan') setGeneralScanResult('waiting');
-        }, 3500);
         return;
       }
 
@@ -1994,9 +1991,6 @@
           </div>
           <h4 class="font-bold text-rose-700 text-base">${safe(nama)} Sudah Absen</h4>
           <p class="text-xs text-rose-600 mt-1">${safe(detail)}</p>`;
-        setTimeout(() => {
-          if (currentActiveView === 'scan') setGeneralScanResult('waiting');
-        }, 3500);
         return;
       }
 
@@ -2007,9 +2001,6 @@
           </div>
           <h4 class="font-bold text-rose-700 text-base">Pemindaian Tidak Valid</h4>
           <p class="text-xs text-rose-600 mt-1">${safe(detail)}</p>`;
-        setTimeout(() => {
-          if (currentActiveView === 'scan') setGeneralScanResult('waiting');
-        }, 3500);
       }
     }
 
@@ -2037,7 +2028,7 @@
         if (isDuplicate) {
           showToast(`⚠️ ${nama} SUDAH absen untuk ${jenis}!`, "error");
           const resEl = document.getElementById('agenda-scan-result');
-          if (resEl) {
+          if (resEl && currentLoggedTeacher) {
             resEl.innerHTML = `<div class="text-rose-600 font-bold text-sm"><i class="fa-solid fa-triangle-exclamation text-xl mb-1"></i><br>${nama} Sudah Absen (${jenis})!</div>`;
           }
           setGeneralScanResult('duplicate', nama, status, `Jenis sesi: ${jenis}`);
@@ -2063,7 +2054,7 @@
           attendanceLogs.unshift(logEntry);
 
           const resEl = document.getElementById('agenda-scan-result');
-          if (resEl) {
+          if (resEl && currentLoggedTeacher) {
             resEl.innerHTML = `<div class="text-emerald-600 font-bold text-sm"><i class="fa-solid fa-circle-check text-xl mb-1"></i><br>${nama} (${status}) Berhasil Dicatat!</div>`;
           }
           setGeneralScanResult('success', nama, status, jenis);
