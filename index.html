@@ -2007,6 +2007,8 @@
     async function recordAttendanceDirect(nisn, nama, kelas, status, jenis, peran = 'Siswa') {
       if (isScanProcessing) return;
       isScanProcessing = true;
+      // Safety: auto-reset setelah 2 detik jika stuck
+      setTimeout(() => { isScanProcessing = false; }, 2000);
 
       try {
         const now = new Date();
@@ -2068,7 +2070,7 @@
         console.error("Error catat absensi:", err);
         setGeneralScanResult('error', nama, status, 'Terjadi kesalahan saat mencatat absensi.');
       } finally {
-        setTimeout(() => { isScanProcessing = false; }, 1200);
+        isScanProcessing = false;
       }
     }
 
