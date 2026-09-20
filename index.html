@@ -2036,7 +2036,8 @@
           setGeneralScanResult('duplicate', nama, status, `Jenis sesi: ${jenis}`);
           playBeep('duplicate');
         } else {
-          const materiVal = document.getElementById('agenda-materi')?.value.trim() || '-';
+          const materiEl = document.getElementById('agenda-materi');
+          const materiVal = materiEl ? materiEl.value.trim() || '-' : '-';
 
           const logEntry = {
             timestamp: `${dateStr} ${now.toLocaleTimeString('id-ID')}`,
