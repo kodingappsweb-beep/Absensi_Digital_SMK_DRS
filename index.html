@@ -3456,7 +3456,7 @@
         // ==== GUARD: SATU WAJAH HANYA BOLEH UNTUK SATU ORANG (siswa & guru) ====
         // Daftar ulang untuk ORANG YANG SAMA diizinkan (menimpa / last-win).
         // Jika wajah cocok dengan orang LAIN yang sudah terdaftar -> ditolak.
-        const ENROLL_DUP_THRESHOLD = 0.50;
+        const ENROLL_DUP_THRESHOLD = 0.45; // diturunkan dari 0.50 agar orang berbeda tidak salah terblokir
         const semuaOrang = [];
         for (const s of students) semuaOrang.push({ id: s.nisn, nama: s.nama, tipe: 'Siswa' });
         for (const g of teachers) semuaOrang.push({ id: g.nip, nama: g.nama, tipe: 'Guru' });
@@ -3474,8 +3474,17 @@
         }
         if (pemilikLama && jarakTerdekat <= ENROLL_DUP_THRESHOLD) {
           if (typeof playBeep === 'function') playBeep('error');
-          showToast("Wajah ini SUDAH terdaftar atas nama " + pemilikLama.nama + " (" + pemilikLama.tipe + "). Satu wajah hanya boleh untuk satu orang. Hapus dulu data wajah yang lama jika ingin memindahkan.", "error");
-          return;
+          // Bukan blokir keras: beri peringatan + opsi override (bisa jadi orang berbeda yang wajahnya mirip)
+          var tetapDaftar = confirm(
+            "PERINGATAN: Wajah ini MIRIP dengan " + pemilikLama.nama + " (" + pemilikLama.tipe + ").\n\n" +
+            "Jika ini memang orang yang SAMA -> klik Batal.\n" +
+            "Jika yakin ini orang BERBEDA (hanya mirip) -> klik OK untuk tetap mendaftarkan."
+          );
+          if (!tetapDaftar) {
+            showToast("Pendaftaran wajah dibatalkan.", "error");
+            return;
+          }
+          showToast("Wajah didaftarkan dengan override (mirip " + pemilikLama.nama + ").", "success");
         }
         // ==== AKHIR GUARD ====
         localStorage.setItem('face_desc_' + enrollNisn, JSON.stringify(Array.from(det.descriptor)));
